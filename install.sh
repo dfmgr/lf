@@ -133,14 +133,14 @@ ensure_perms
 # Main progam
 if __am_i_online; then
 
-  if [ -d "$APPDIR/.git" ]; then
+  if [ -d "$INSTALLDIR/.git" ]; then
     execute \
-      "git_update $APPDIR" \
+      "git_update $INSTALLDIR" \
       "Updating $APPNAME configurations"
   else
     execute \
       "backupapp && \
-        git_clone -q $REPO/$APPNAME $APPDIR" \
+        git_clone -q $REPO/$APPNAME $INSTALLDIR" \
       "Installing $APPNAME configurations"
   fi
 
