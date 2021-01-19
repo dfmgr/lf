@@ -131,7 +131,6 @@ ensure_perms
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main progam
-if __am_i_online; then
 
   if [ -d "$DOWNLOADED_TO/.git" ]; then
     execute \
@@ -151,6 +150,7 @@ if __am_i_online; then
 
   # Plugins
 
+if __am_i_online; then
   if [ "$PLUGNAMES" != "" ]; then
     if [ -d "$PLUGDIR"/PLUREP/.git ]; then
       execute \
@@ -162,10 +162,10 @@ if __am_i_online; then
         "Installing plugin PLUGREP"
     fi
   fi
+fi
 
   # exit on fail
   failexitcode
-fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # run post install scripts
