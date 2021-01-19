@@ -1,5 +1,5 @@
 # Basic Settings
-set previewer ~/.config/lf/preview
+set previewer ~/.local/bin/preview
 set preview true
 set hidden true
 set color256 true
@@ -138,12 +138,12 @@ map e
 map f
 
 # Not really image preview
-map - $~/.config/lf/draw_img "$f"
+map - $~/.local/bin/draw_img "$f" 2>/dev/null
 
 cmd video_preview ${{
     CACHE=$(mktemp /tmp/thumb_cache.XXXXX)
     ffmpegthumbnailer -i "$f" -o $CACHE -s 0
-    ~/.config/lf/draw_img $CACHE && rm $CACHE
+    ~/.local/bin/draw_img $CACHE && rm $CACHE
 }}
 map + :video_preview
 

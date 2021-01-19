@@ -14,4 +14,4 @@ main() {
   "*") echo "Unknown command: '$1', '$2'" ;;
   esac
 }
-main "$@"
+main "$@" 2>/dev/null

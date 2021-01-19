@@ -52,7 +52,7 @@ APPNAME="${APPNAME:-lf}"
 APPDIR="${APPDIR:-$HOME/.config/$APPNAME}"
 REPO="${DFMGRREPO:-https://github.com/dfmgr}/${APPNAME}"
 REPORAW="${REPORAW:-$REPO/raw}"
-APPVERSION="$(curl -LSs $REPORAW/master/version.txt)"
+APPVERSION="$(__appversion)"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -66,10 +66,6 @@ PLUGDIR="${SHARE:-$HOME/.local/share}/$APPNAME"
 # dfmgr_install fontmgr_install iconmgr_install pkmgr_install systemmgr_install thememgr_install wallpapermgr_install
 
 dfmgr_install
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-# Version
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -134,42 +130,42 @@ ensure_dirs
 ensure_perms
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 # Main progam
+if __am_i_online; then
 
-if [ -d "$APPDIR/.git" ]; then
-  execute \
-  "git_update $APPDIR" \
-  "Updating $APPNAME configurations"
-else
-  execute \
-  "backupapp && \
-        git_clone -q $REPO/$APPNAME $APPDIR" \
-  "Installing $APPNAME configurations"
-fi
-
-# exit on fail
-failexitcode
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-# Plugins
-
-if [ "$PLUGNAMES" != "" ]; then
-  if [ -d "$PLUGDIR"/PLUREP/.git ]; then
+  if [ -d "$APPDIR/.git" ]; then
     execute \
-    "git_update $PLUGDIR/PLUGREP" \
-    "Updating plugin PLUGNAME"
+      "git_update $APPDIR" \
+      "Updating $APPNAME configurations"
   else
     execute \
-    "git_clone PLUGINREPO $PLUGDIR/PLUGREP" \
-    "Installing plugin PLUGREP"
+      "backupapp && \
+        git_clone -q $REPO/$APPNAME $APPDIR" \
+      "Installing $APPNAME configurations"
   fi
+
+  # exit on fail
+  failexitcode
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  # Plugins
+
+  if [ "$PLUGNAMES" != "" ]; then
+    if [ -d "$PLUGDIR"/PLUREP/.git ]; then
+      execute \
+        "git_update $PLUGDIR/PLUGREP" \
+        "Updating plugin PLUGNAME"
+    else
+      execute \
+        "git_clone PLUGINREPO $PLUGDIR/PLUGREP" \
+        "Installing plugin PLUGREP"
+    fi
+  fi
+
+  # exit on fail
+  failexitcode
 fi
-
-# exit on fail
-failexitcode
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # run post install scripts
@@ -179,8 +175,8 @@ run_postinst() {
 }
 
 execute \
-"run_postinst" \
-"Running post install scripts"
+  "run_postinst" \
+  "Running post install scripts"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
