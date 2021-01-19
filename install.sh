@@ -33,7 +33,7 @@ else
 fi
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-user_installdirs
+user_DOWNLOADED_TOs
 
 # OS Support: supported_os unsupported_oses
 
@@ -133,14 +133,14 @@ ensure_perms
 # Main progam
 if __am_i_online; then
 
-  if [ -d "$INSTALLDIR/.git" ]; then
+  if [ -d "$DOWNLOADED_TO/.git" ]; then
     execute \
-      "git_update $INSTALLDIR" \
+      "git_update $DOWNLOADED_TO" \
       "Updating $APPNAME configurations"
   else
     execute \
       "backupapp && \
-        git_clone -q $REPO/$APPNAME $INSTALLDIR" \
+        git_clone -q $REPO/$APPNAME $DOWNLOADED_TO" \
       "Installing $APPNAME configurations"
   fi
 
