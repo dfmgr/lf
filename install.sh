@@ -33,7 +33,7 @@ else
 fi
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-user_DOWNLOADED_TOs
+user_installdirs
 
 # OS Support: supported_os unsupported_oses
 
