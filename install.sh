@@ -132,23 +132,26 @@ ensure_perms
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main progam
 
-  if [ -d "$DOWNLOADED_TO/.git" ]; then
-    execute \
-      "git_update $DOWNLOADED_TO" \
-      "Updating $APPNAME configurations"
-  else
-    execute \
-      "backupapp && \
-        git_clone -q $REPO/$APPNAME $DOWNLOADED_TO" \
-      "Installing $APPNAME configurations"
-  fi
+if [ -d "$APPDIR" ]; then
+  execute "backupapp $APPDIR $APPNAME" "Backing up $APPDIR"
+fi
 
-  # exit on fail
-  failexitcode
+if [ -d "$DOWNLOADED_TO/.git" ]; then
+  execute \
+    "git_update $DOWNLOADED_TO" \
+    "Updating $APPNAME configurations"
+else
+  execute \
+    "git_clone -q $REPO/$APPNAME $DOWNLOADED_TO" \
+    "Installing $APPNAME configurations"
+fi
 
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# exit on fail
+failexitcode
 
-  # Plugins
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Plugins
 
 if __am_i_online; then
   if [ "$PLUGNAMES" != "" ]; then
@@ -162,10 +165,11 @@ if __am_i_online; then
         "Installing plugin PLUGREP"
     fi
   fi
-fi
 
   # exit on fail
   failexitcode
+fi
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # run post install scripts
