@@ -1,5 +1,27 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+PROG="preview"
+USER="${SUDO_USER:-${USER}}"
+HOME="${USER_HOME:-${HOME}}"
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#set opts
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+##@Version       : 021020210301-git
+# @Author        : Jason Hempstead
+# @Contact       : jason@casjaysdev.com
+# @License       : LICENSE.md
+# @ReadME        : README.md
+# @Copyright     : Copyright: (c) 2021 Jason Hempstead, CasjaysDev
+# @Created       : Saturday, Mar 06, 2021 02:52 EST
+# @File          : preview
+# @Description   : lf preview script
+# @TODO          :
+# @Other         :
+# @Resource      :
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Clear the last preview (if any)
 ~/.local/bin/image clear
 

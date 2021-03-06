@@ -1,9 +1,28 @@
 #!/usr/bin/env bash
 
-clear_screen() {
-  printf '\e[%sH\e[9999C\e[1J%b\e[1;%sr' \
-    "$((LINES - 2))" "${TMUX:+\e[2J}" "$max_items"
-}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+PROG="draw_img"
+USER="${SUDO_USER:-${USER}}"
+HOME="${USER_HOME:-${HOME}}"
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#set opts
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+##@Version       : 021020210301-git
+# @Author        : Jason Hempstead
+# @Contact       : jason@casjaysdev.com
+# @License       : LICENSE.md
+# @ReadME        : README.md
+# @Copyright     : Copyright: (c) 2021 Jason Hempstead, CasjaysDev
+# @Created       : Saturday, Mar 06, 2021 02:52 EST
+# @File          : draw_img
+# @Description   : lf image preview script
+# @TODO          :
+# @Other         :
+# @Resource      :
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+clear_screen() { printf '\e[%sH\e[9999C\e[1J%b\e[1;%sr' "$((LINES - 2))" "${TMUX:+\e[2J}" "$max_items"; }
 
 # Get a file's mime_type.
 mime_type=$(file -bi "$1")
@@ -47,21 +66,12 @@ clear_screen
 printf '\e[?25l'
 
 # Display the image.
-printf '0;1;%s;%s;%s;%s;;;;;%s\n3;\n4\n' \
-  ${X_POS:-0} \
-  ${Y_POS:-0} \
-  "$img_width" \
-  "$img_height" \
-  "${CACHE:-$1}" | "$w3m" &>/dev/null
+printf '0;1;%s;%s;%s;%s;;;;;%s\n3;\n4\n' ${X_POS:-0} ${Y_POS:-0} "$img_width" "$img_height" "${CACHE:-$1}" | "$w3m" &>/dev/null
 
 # Wait for user input.
 read -ern 1
 
 # Clear the image.
-printf '6;%s;%s;%s;%s\n3;' \
-  "${X_POS:-0}" \
-  "${Y_POS:-0}" \
-  "$WIDTH" \
-  "$HEIGHT" | "$w3m" &>/dev/null
+printf '6;%s;%s;%s;%s\n3;' "${X_POS:-0}" "${Y_POS:-0}" "$WIDTH" "$HEIGHT" | "$w3m" &>/dev/null
 
 clear_screen

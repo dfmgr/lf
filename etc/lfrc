@@ -2,7 +2,7 @@
 set previewer ~/.local/bin/preview
 set preview true
 set hidden true
-set color256 true
+#set color256 true
 set drawbox true
 set icons true
 set ignorecase true
@@ -10,8 +10,10 @@ set ignorecase true
 # Custom Functions
 cmd open ${{
     case $(file --mime-type "$f" -bL) in
+        image/*) sxiv "$f";;
+        *pdf*) xdg-open "$f";;
         text/*|application/json) $EDITOR "$f";;
-        video/*|image/*/application/pdf) xdg-open "$f";;
+        video/*) xdg-open "$f";;
         *) xdg-open "$f" ;;
     esac
 }}
@@ -36,7 +38,7 @@ cmd chmod ${{
   do
     chmod $ans $file
   done
-  
+
   lf -remote 'send reload'
 }}
 
@@ -46,7 +48,7 @@ cmd sudomkfile ${{
   sudo $EDITOR $ans
 }}
 
-cmd setwallpaper %cp "$f" ~/.config/background.png && xwallpaper --zoom "$f"
+cmd setwallpaper %cp "$f" ~/.local/share/wallpapers/system/background.png && xwallpaper --zoom "~/.local/share/wallpapers/system/background.png"
 
 cmd fzf_jump ${{
   res="$(find . -maxdepth 3 | fzf --reverse --header='Jump to location')"
@@ -97,30 +99,20 @@ cmd tar %tar cvf "$f.tar" "$f"
 cmd targz %tar cvzf "$f.tar.gz" "$f"
 cmd tarbz2 %tar cjvf "$f.tar.bz2" "$f"
 
-# Trash cli bindings
 cmd trash ${{
-  files=$(printf "$fx" | tr '\n' ';')
-  while [ "$files" ]; do
-    # extract the substring from start of string up to delimiter.
-    # this is the first "element" of the string.
-    file=${files%%;*}
-
-    trash-put "$(basename "$file")"
-    # if there's only one element left, set `files` to an empty string.
-    # this causes us to exit this `while` loop.
-    # else, we delete the first "element" of the string from files, and move onto the next.
-    if [ "$files" = "$file" ]; then
-      files=''
-    else
-      files="${files#*;}"
-    fi
-  done
+  if cmd_exists trash; then
+     trash "$fs"
+  else
+    mv -f "$fs" ~/.local/share/Trash/files/"$fs"
+  fi
 }}
 
-cmd clear_trash %trash-empty
+cmd clear_trash ${{
+  trash empty
+}}
 
 cmd restore_trash ${{
-  trash-restore
+  trash restore $fx
 }}
 
 cmd stripspace %stripspace "$f"
