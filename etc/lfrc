@@ -101,9 +101,9 @@ cmd tarbz2 %tar cjvf "$f.tar.bz2" "$f"
 
 cmd trash ${{
   if cmd_exists trash; then
-     trash "$fs"
+     trash "$f"
   else
-    mv -f "$fs" ~/.local/share/Trash/files/"$fs"
+    mv -f "$f" ~/.local/share/Trash/files/"$f"
   fi
 }}
 
