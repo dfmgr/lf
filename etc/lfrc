@@ -1,8 +1,8 @@
 # Basic Settings
+set shell bash
 set previewer ~/.local/bin/preview
 set preview true
 set hidden true
-#set color256 true
 set drawbox true
 set icons true
 set ignorecase true
@@ -14,20 +14,20 @@ cmd open ${{
         *pdf*) xdg-open "$f";;
         text/*|application/json) $EDITOR "$f";;
         video/*) xdg-open "$f";;
-        *) xdg-open "$f" ;;
+        *) for f in $fx; do setsid $OPENER $f 2>/dev/null & done ;;
     esac
 }}
 
 cmd mkdir ${{
   printf "Directory Name: "
   read ans
-  mkdir $ans
+  mkdir "$ans"
 }}
 
 cmd mkfile ${{
   printf "File Name: "
   read ans
-  $EDITOR $ans
+  $EDITOR "$ans"
 }}
 
 cmd chmod ${{
@@ -36,7 +36,7 @@ cmd chmod ${{
 
   for file in "$fx"
   do
-    chmod $ans $file
+    chmod $ans "$file"
   done
 
   lf -remote 'send reload'
@@ -45,10 +45,13 @@ cmd chmod ${{
 cmd sudomkfile ${{
   printf "File Name: "
   read ans
-  sudo $EDITOR $ans
+  sudo $EDITOR "$ans"
 }}
 
-cmd setwallpaper %cp "$f" ~/.local/share/wallpapers/system/background.png && xwallpaper --zoom "~/.local/share/wallpapers/system/background.png"
+cmd setwallpaper ${{
+  cp -f "$f" ~/.local/share/wallpapers/system/background.png
+  randomwallpaper "$f" &>/dev/null &
+}}
 
 cmd fzf_jump ${{
   res="$(find . -maxdepth 3 | fzf --reverse --header='Jump to location')"
@@ -112,7 +115,7 @@ cmd clear_trash ${{
 }}
 
 cmd restore_trash ${{
-  trash restore $fx
+  trash restore "$fx"
 }}
 
 cmd stripspace %stripspace "$f"
@@ -129,8 +132,10 @@ map c
 map e
 map f
 
-# Not really image preview
-map - $~/.local/bin/draw_img "$f" 2>/dev/null
+cmd image_preview ${{
+    ~/.local/bin/draw_img "$f" 2>/dev/null
+}}
+map + :image_preview
 
 cmd video_preview ${{
     CACHE=$(mktemp /tmp/thumb_cache.XXXXX)
@@ -210,3 +215,4 @@ map gc cd ~/.config
 map gE cd /etc
 map gU. cd /usr
 map gUs cd /usr/share
+

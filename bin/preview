@@ -24,6 +24,9 @@ HOME="${USER_HOME:-${HOME}}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Clear the last preview (if any)
 ~/.local/bin/image clear
+TMPDIR="${TMP:-/tmp}"
+FILE_PATH="${1}"
+IMAGE_CACHE_PATH="$(mktemp "$TMPDIR/cache.XXXXX")"
 
 # Calculate where the image should be placed on the screen.
 num=$(printf "%0.f\n" "$(echo "$(tput cols) / 2" | bc)")
@@ -31,6 +34,23 @@ numb=$(printf "%0.f\n" "$(echo "$(tput cols) - $num - 1" | bc)")
 numc=$(printf "%0.f\n" "$(echo "$(tput lines) - 2" | bc)")
 
 case "$1" in
+application/font*|application/*opentype)
+  preview_png="$TMPDIR/$(basename "${IMAGE_CACHE_PATH%.*}").png"
+  if fontimage -o "${preview_png}" \
+  --pixelsize "120" \
+  --fontname \
+  --pixelsize "80" \
+  --text "  ABCDEFGHIJKLMNOPQRSTUVWXYZ  " \
+  --text "  abcdefghijklmnopqrstuvwxyz  " \
+  --text "  0123456789.:,;(*!?') ff fl fi ffi ffl  " \
+  --text "  The quick brown fox jumps over the lazy dog.  " \
+  "${FILE_PATH}";
+  then
+    convert -- "${preview_png}" "${IMAGE_CACHE_PATH}" && rm "${preview_png}" && exit 0
+  else
+    exit 1
+  fi
+;;
 *.tgz | *.tar.gz) tar tzf "$1" ;;
 *.tar.bz2 | *.tbz2) tar tjf "$1" ;;
 *.tar.txz | *.txz) xz --list "$1" ;;
@@ -56,7 +76,7 @@ case "$1" in
 	epub-thumbnailer "$1" "$CACHE" 1024
 	~/.local/bin/image draw "$CACHE" $num 1 $numb $numc 2>/dev/null
 	;;
-*.bmp | *.jpg | *.jpeg | *.png | *.xpm)
+*.bmp | *.jpg | *.jpeg | *.png | *.xpm | .face)
 	~/.local/bin/image draw "$1" $num 1 $numb $numc 2>/dev/null
 	;;
 *.wav | *.mp3 | *.flac | *.m4a | *.wma | *.ape | *.ac3 | *.og[agx] | *.spx | *.opus | *.as[fx] | *.flac) exiftool "$1" ;;
