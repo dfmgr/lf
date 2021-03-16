@@ -1,89 +1,129 @@
 #!/usr/bin/env bash
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 PROG="preview"
 USER="${SUDO_USER:-${USER}}"
 HOME="${USER_HOME:-${HOME}}"
-
+SRC_DIR="${BASH_SOURCE%/*}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #set opts
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version       : 021020210301-git
+##@Version       : 031520211811-git
 # @Author        : Jason Hempstead
 # @Contact       : jason@casjaysdev.com
-# @License       : LICENSE.md
-# @ReadME        : README.md
+# @License       : WTFPL
+# @ReadME        : preview --help
 # @Copyright     : Copyright: (c) 2021 Jason Hempstead, CasjaysDev
-# @Created       : Saturday, Mar 06, 2021 02:52 EST
+# @Created       : Monday, Mar 15, 2021 18:11 EDT
 # @File          : preview
 # @Description   : lf preview script
 # @TODO          :
 # @Other         :
 # @Resource      :
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Clear the last preview (if any)
-~/.local/bin/image clear
-TMPDIR="${TMP:-/tmp}"
-FILE_PATH="${1}"
-IMAGE_CACHE_PATH="$(mktemp "$TMPDIR/cache.XXXXX")"
+# Main function file
+if [ -f "$SRC_DIR/functions.bash" ]; then
+  FUNCTIONS_DIR="$SRC_DIR"
+  . "$FUNCTIONS_DIR/functions.bash"
+elif [ -f "$HOME/.local/bin/functions.bash" ]; then
+  FUNCTIONS_DIR="$HOME/.local/bin"
+  . "$FUNCTIONS_DIR/functions.bash"
+else
+  printf "\t\t\033[0;31m%s \033[0m\n" "Couldn't source the functions file from $FUNCTIONS_DIR"
+  return 1
+fi
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# helper function
+__version() { app_version; }
+__help() {
+  app_help "Usage: preview  -  preview --version"  \
+    "-v, --version          -  display version" \
+    "-h, --help             -  display help"
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Main function
+main() {
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # options
+  case $1 in
+    -v | --version) __version ;;
+    -h | --help) __help ;;
+  esac
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # Required app check
+  cmd_exists --error bash || exit 1
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # begin main app
+  # Clear the last preview (if any)
+  $HOME/.local/bin/image clear
+  TMPDIR="${TMP:-/tmp}"
+  FILE_PATH="${1}"
+  IMAGE_CACHE_PATH="$(mktemp "$TMPDIR/cache.XXXXX")"
+  # Calculate where the image should be placed on the screen.
+  num=$(printf "%0.f\n" "$(echo "$(tput cols) / 2" | bc)")
+  numb=$(printf "%0.f\n" "$(echo "$(tput cols) - $num - 1" | bc)")
+  numc=$(printf "%0.f\n" "$(echo "$(tput lines) - 2" | bc)")
+  case "$1" in
+    application/font*|application/*opentype)
+      preview_png="$TMPDIR/$(basename "${IMAGE_CACHE_PATH%.*}").png"
+      if fontimage -o "${preview_png}" \
+        --pixelsize "120" \
+        --fontname \
+        --pixelsize "80" \
+        --text "  ABCDEFGHIJKLMNOPQRSTUVWXYZ  " \
+        --text "  abcdefghijklmnopqrstuvwxyz  " \
+        --text "  0123456789.:,;(*!?') ff fl fi ffi ffl  " \
+        --text "  The quick brown fox jumps over the lazy dog.  " \
+        "${FILE_PATH}";
+      then
+        convert -- "${preview_png}" "${IMAGE_CACHE_PATH}" && rm "${preview_png}" && exit 0
+      else
+        exit 1
+      fi
+    ;;
+    *.tgz | *.tar.gz) tar tzf "$1" ;;
+    *.tar.bz2 | *.tbz2) tar tjf "$1" ;;
+    *.tar.txz | *.txz) xz --list "$1" ;;
+    *.tar) tar tf "$1" ;;
+    *.zip | *.jar | *.war | *.ear | *.oxt) unzip -l "$1" ;;
+    *.rar) unrar l "$1" ;;
+    *.7z) 7z l "$1" ;;
+    *.[1-8]) man "$1" | col -b ;;
+    *.o) nm "$1" | less ;;
+    *.torrent) transmission-show "$1" ;;
+    *.iso) iso-info --no-header -l "$1" ;;
+    *odt,*.ods,*.odp,*.sxw) odt2txt "$1" ;;
+    *.doc) catdoc "$1" ;;
+    *.docx) docx2txt "$1" - ;;
+    *.csv) cat "$1" | sed s/,/\\n/g ;;
+    *.pdf)
+	    CACHE=$(mktemp /tmp/thumbcache.XXXXX)
+	    pdftoppm -png -f 1 -singlefile "$1" "$CACHE"
+	    ~/.local/bin/image draw "$CACHE.png" $num 1 $numb $numc 2>/dev/null
+	  ;;
+    *.epub)
+	    CACHE=$(mktemp /tmp/thumbcache.XXXXX)
+	    epub-thumbnailer "$1" "$CACHE" 1024
+	    ~/.local/bin/image draw "$CACHE" $num 1 $numb $numc 2>/dev/null
+	  ;;
+    *.bmp | *.jpg | *.jpeg | *.png | *.xpm | .face)
+	    ~/.local/bin/image draw "$1" $num 1 $numb $numc 2>/dev/null
+	  ;;
+    *.wav | *.mp3 | *.flac | *.m4a | *.wma | *.ape | *.ac3 | *.og[agx] | *.spx | *.opus | *.as[fx] | *.flac) exiftool "$1" ;;
+    *.avi | *.mp4 | *.wmv | *.dat | *.3gp | *.ogv | *.mkv | *.mpg | *.mpeg | *.vob | *.fl[icv] | *.m2v | *.mov | *.webm | *.ts | *.mts | *.m4v | *.r[am] | *.qt | *.divx)
+	    CACHE=$(mktemp /tmp/thumbcache.XXXXX)
+	    ffmpegthumbnailer -i "$1" -o "$CACHE" -s 0
+	    ~/.local/bin/image draw "$CACHE" $num 1 $numb $numc 2>/dev/null
+	  ;;
+    *) highlight --out-format ansi "$1" 2>/dev/null || cat "$1" ;;
+  esac
+  return ${exitCode:-$?}
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# execute function
+main "$@"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+exit $?
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# end
 
-# Calculate where the image should be placed on the screen.
-num=$(printf "%0.f\n" "$(echo "$(tput cols) / 2" | bc)")
-numb=$(printf "%0.f\n" "$(echo "$(tput cols) - $num - 1" | bc)")
-numc=$(printf "%0.f\n" "$(echo "$(tput lines) - 2" | bc)")
-
-case "$1" in
-application/font*|application/*opentype)
-  preview_png="$TMPDIR/$(basename "${IMAGE_CACHE_PATH%.*}").png"
-  if fontimage -o "${preview_png}" \
-  --pixelsize "120" \
-  --fontname \
-  --pixelsize "80" \
-  --text "  ABCDEFGHIJKLMNOPQRSTUVWXYZ  " \
-  --text "  abcdefghijklmnopqrstuvwxyz  " \
-  --text "  0123456789.:,;(*!?') ff fl fi ffi ffl  " \
-  --text "  The quick brown fox jumps over the lazy dog.  " \
-  "${FILE_PATH}";
-  then
-    convert -- "${preview_png}" "${IMAGE_CACHE_PATH}" && rm "${preview_png}" && exit 0
-  else
-    exit 1
-  fi
-;;
-*.tgz | *.tar.gz) tar tzf "$1" ;;
-*.tar.bz2 | *.tbz2) tar tjf "$1" ;;
-*.tar.txz | *.txz) xz --list "$1" ;;
-*.tar) tar tf "$1" ;;
-*.zip | *.jar | *.war | *.ear | *.oxt) unzip -l "$1" ;;
-*.rar) unrar l "$1" ;;
-*.7z) 7z l "$1" ;;
-*.[1-8]) man "$1" | col -b ;;
-*.o) nm "$1" | less ;;
-*.torrent) transmission-show "$1" ;;
-*.iso) iso-info --no-header -l "$1" ;;
-*odt,*.ods,*.odp,*.sxw) odt2txt "$1" ;;
-*.doc) catdoc "$1" ;;
-*.docx) docx2txt "$1" - ;;
-*.csv) cat "$1" | sed s/,/\\n/g ;;
-*.pdf)
-	CACHE=$(mktemp /tmp/thumbcache.XXXXX)
-	pdftoppm -png -f 1 -singlefile "$1" "$CACHE"
-	~/.local/bin/image draw "$CACHE.png" $num 1 $numb $numc 2>/dev/null
-	;;
-*.epub)
-	CACHE=$(mktemp /tmp/thumbcache.XXXXX)
-	epub-thumbnailer "$1" "$CACHE" 1024
-	~/.local/bin/image draw "$CACHE" $num 1 $numb $numc 2>/dev/null
-	;;
-*.bmp | *.jpg | *.jpeg | *.png | *.xpm | .face)
-	~/.local/bin/image draw "$1" $num 1 $numb $numc 2>/dev/null
-	;;
-*.wav | *.mp3 | *.flac | *.m4a | *.wma | *.ape | *.ac3 | *.og[agx] | *.spx | *.opus | *.as[fx] | *.flac) exiftool "$1" ;;
-*.avi | *.mp4 | *.wmv | *.dat | *.3gp | *.ogv | *.mkv | *.mpg | *.mpeg | *.vob | *.fl[icv] | *.m2v | *.mov | *.webm | *.ts | *.mts | *.m4v | *.r[am] | *.qt | *.divx)
-	CACHE=$(mktemp /tmp/thumbcache.XXXXX)
-	ffmpegthumbnailer -i "$1" -o "$CACHE" -s 0
-	~/.local/bin/image draw "$CACHE" $num 1 $numb $numc 2>/dev/null
-	;;
-*) highlight --out-format ansi "$1" 2>/dev/null || cat "$1" ;;
-esac
