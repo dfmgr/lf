@@ -5,7 +5,7 @@ lf is a terminal file manager written in Go
 Automatic install/update:
 
 ```shell
-bash -c "$(curl -LSs https://github.com/dfmgr/lf/raw/master/install.sh)"
+bash -c "$(curl -LSs https://github.com/dfmgr/lf/raw/main/install.sh)"
 ```
 
 Manual install:
