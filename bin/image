@@ -36,7 +36,7 @@ fi
 # helper function
 __version() { app_version; }
 __help() {
-  app_help "Usage: image  -  image --version"  \
+  app_help "Usage: image  -  image --version" \
     "-v, --version          -  display version" \
     "-h, --help             -  display help"
 }
@@ -46,8 +46,8 @@ main() {
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # options
   case $1 in
-    -v | --version) __version ;;
-    -h | --help) __help ;;
+  -v | --version) __version ;;
+  -h | --help) __help ;;
   esac
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Required app check
@@ -59,13 +59,16 @@ main() {
     declare -p -A cmd=([action]=add [identifier]="$ID_PREVIEW" [x]="$3" [y]="$4" [max_width]="$5" [max_height]="$6" [path]="$2")
   }
   case "$1" in
-    "clear")
-      declare -p -A cmd=([action]=remove [identifier]="$ID_PREVIEW") >"$FIFO_UEBERZUG"
+  "clear")
+    declare -p -A cmd=([action]=remove [identifier]="$ID_PREVIEW") >"$FIFO_UEBERZUG"
     ;;
-    "draw")
-      __draw >"$FIFO_UEBERZUG" 2>/dev/null
+  "draw")
+    __draw >"$FIFO_UEBERZUG" 2>/dev/null
     ;;
-    "*") echo "Unknown command: '$1', '$2'";exit 1 ;;
+  "*")
+    echo "Unknown command: '$1', '$2'"
+    exit 1
+    ;;
   esac
   return "${exitCode:-$?}"
 }
@@ -76,4 +79,3 @@ main "$@"
 exit $?
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # end
-
